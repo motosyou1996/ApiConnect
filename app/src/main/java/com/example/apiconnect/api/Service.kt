@@ -1,10 +1,13 @@
 package com.example.apiconnect.api
 
 import com.google.gson.annotations.SerializedName
-import retrofit2.Call
+import okhttp3.OkHttpClient
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
-interface Service{/**建立資料Model*/
+interface Service{/**建立Model*/
     data class PostRequest(
         @SerializedName("ATTRIBUTES") val attributes: String,
         @SerializedName("C_ID") val c_Id: String,
@@ -27,5 +30,23 @@ interface Service{/**建立資料Model*/
     )
 
     @GET("/api/service/get/a5adfb5a-708e-443f-a2da-acb80a7fed61")/**相對路徑*/
-    fun index(): Call<PostResponse>
+    suspend fun index(): Response<PostResponse>
+
+    companion object{/**產生Retrofit物件*/
+        private const val URL = "https://api.kcg.gov.tw"
+        var service : Service? = null
+        fun getInstance() : Service{
+            if (service == null){
+                val client = OkHttpClient.Builder().build()
+                val retrofit: Retrofit = Retrofit.Builder()
+                    .baseUrl(URL)
+                    .addConverterFactory((GsonConverterFactory.create()))
+                    .client(client)
+                    .build()
+                service = retrofit.create(Service ::class.java)
+            }
+            return service!!
+        }
+    }
+
 }
